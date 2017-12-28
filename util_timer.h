@@ -22,32 +22,32 @@
 
     EXAMPLE:
     -------
-
+    
     #include <util_timer.h>
 
     // a.) simple time measurement ------------------------------------------
     timedelta_us_16 measure;
-
+    
     const uint16_t t1 = measure.elapsed();
     const uint16_t t2 = measure.elapsed();
 
     // b.) simple timeout ---------------------------------------------------
-    timedelta_us_16 timeout1( 1234 /* us *);
-
+    timedelta_us_16 timeout1( 1234 );
+    
     // do until elapsed
     while( timeout1.is_pending() )
     {
         // do anything ...
         delay( ... )
     }
-
+    
     *************************************************************************************
 */
 #ifndef KID_UTIL_TIMER_H_
 #define KID_UTIL_TIMER_H_
 
 #include <arduino.h>
-
+ 
 // **************************************************************************************
 
 // helper class
@@ -66,7 +66,7 @@ template<typename T> struct time_clock
     return (T)micros();
 
   } // end of micros_()
-
+  
 }; // end of time_clock
 
 // **************************************************************************************
@@ -116,15 +116,16 @@ template< typename T = uint16_t, T (*TFUNC)() = time_clock<T>::micros_f > struct
   {
     return end - start;
   }
-
+  
   // number of time ticks until the timeout
   inline T pending() const
   {
 	// get current state
-    auto const delta = elapsed(), const tmo = timeout();
+    const T delta = elapsed();
+    const T tmo = timeout();
 
     // determine
-    return delta < tmo ( tmo - delta ) : 0;
+    return delta < tmo ? ( tmo - delta ) : 0;
 
   } // end of pending()
 
@@ -132,7 +133,7 @@ template< typename T = uint16_t, T (*TFUNC)() = time_clock<T>::micros_f > struct
   inline bool is_pending() const
   {
      return 0 != pending();
-
+  
   } // end of has_pending()
 
   inline T elapsed() const
@@ -149,7 +150,7 @@ template< typename T = uint16_t, T (*TFUNC)() = time_clock<T>::micros_f > struct
   inline bool is_elapsed() const
   {
      return 0 == pending();
-
+  
   } // end of has_pending()
 
   // start time
@@ -162,7 +163,7 @@ template< typename T = uint16_t, T (*TFUNC)() = time_clock<T>::micros_f > struct
 // **************************************************************************************
 
 // some shortcuts
-typedef time_delta< uint8_t,  time_clock<uint8_t>:: micros_f > timedelta_us_8;  // +0  reference
+typedef time_delta< uint8_t,  time_clock<uint8_t>:: micros_f > timedelta_us_8;  // +0  reference 
 typedef time_delta< uint16_t, time_clock<uint16_t>::micros_f > timedelta_us_16; // +26 opcodes
 typedef time_delta< uint32_t, time_clock<uint32_t>::micros_f > timedelta_us_32; // +86 opcodes
 typedef time_delta< uint8_t,  time_clock<uint8_t>:: millis_f > timedelta_ms_8;
