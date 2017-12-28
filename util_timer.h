@@ -56,14 +56,14 @@ template<typename T> struct time_clock
   // internal function to get micro(s) base on current type
   static inline T micros_f()
   {
-    return (T)micros();
+    return micros();
 
   } // end of micros_()
 
   // internal function to get millis(s) base on current type
   static inline T millis_f()
   {
-    return (T)micros();
+    return millis();
 
   } // end of micros_()
   
@@ -72,10 +72,10 @@ template<typename T> struct time_clock
 // **************************************************************************************
 
 // template for simple time measurements
-template< typename T = uint16_t, T (*TFUNC)() = time_clock<T>::micros_f > struct time_delta
+template< typename T, T (*TFUNC)() > struct time_delta
 {
   // calculate maximum storage of type 2^N (bits)
-  static constexpr T MAX_VAL = 2 ^ ( sizeof(T) * 8 );
+  static constexpr T MAX_VAL = ( 2 ^ ( sizeof(T) * 8 ) ) - 1;
 
   // ctor
   time_delta( T timeout = 0 )
@@ -96,25 +96,33 @@ template< typename T = uint16_t, T (*TFUNC)() = time_clock<T>::micros_f > struct
   inline void operator = ( const time_delta & rhs )
   {
     start = rhs.start;
-    end   = rhs.end;
+    tmo   = rhs.tmo;
   }
 
-  // reset timeout measurement with current timeout
-  inline void reset()
+  // reset timeout measurement with current timeout and
+  // return elapsed time at point of call
+  inline T reset()
   {
-    restart( end - start );
+    // get raw values
+    const T now     = time();
+    const T elapsed = _elapsed( now );
+
+    // set start time
+    start = now;
+
+    return elapsed;
   }
 
   // restart timeout measurement with new timeout
   inline void restart( T timeout )
   {
-    start = TFUNC(); end = start + timeout;
+    start = time(); tmo = timeout;
   }
 
   // returns the current timeout
-  inline T timeout()
+  inline T timeout() const
   {
-    return end - start;
+    return timeout;
   }
   
   // number of time ticks until the timeout
@@ -122,7 +130,7 @@ template< typename T = uint16_t, T (*TFUNC)() = time_clock<T>::micros_f > struct
   {
 	// get current state
     const T delta = elapsed();
-    const T tmo = timeout();
+    const T tmo   = timeout();
 
     // determine
     return delta < tmo ? ( tmo - delta ) : 0;
@@ -136,13 +144,11 @@ template< typename T = uint16_t, T (*TFUNC)() = time_clock<T>::micros_f > struct
   
   } // end of has_pending()
 
+  // returns the elapsed time in time units
   inline T elapsed() const
   {
-    // get fresh sample
-    const T now = TFUNC();
-
-    // normal increase or overflow ?
-    return ( now > start ) ? ( now - start ) : ( MAX_VAL - start + now );
+    // get time sample and forward
+    return _elapsed( time() );
 
   } // end of elapsed()
 
@@ -153,19 +159,34 @@ template< typename T = uint16_t, T (*TFUNC)() = time_clock<T>::micros_f > struct
   
   } // end of has_pending()
 
+  // calculate elapsed time based on a time value
+  inline T _elapsed( T time ) const
+  {
+    // normal increase or overflow ?
+    return ( time > start ) ? ( time - start ) : ( MAX_VAL - start + time );
+
+  } // end of elapsed()
+
+  // get time in ticks of time base
+  inline static T time()
+  {
+    return TFUNC();
+  }
+
   // start time
   T start;
 
-  // end time
-  T end;
-};
+  // timeout
+  T tmo;
+
+}; // end of time_delta
 
 // **************************************************************************************
 
 // some shortcuts
-typedef time_delta< uint8_t,  time_clock<uint8_t>:: micros_f > timedelta_us_8;  // +0  reference 
-typedef time_delta< uint16_t, time_clock<uint16_t>::micros_f > timedelta_us_16; // +26 opcodes
-typedef time_delta< uint32_t, time_clock<uint32_t>::micros_f > timedelta_us_32; // +86 opcodes
+typedef time_delta< uint8_t,  time_clock<uint8_t>:: micros_f > timedelta_us_8;
+typedef time_delta< uint16_t, time_clock<uint16_t>::micros_f > timedelta_us_16;
+typedef time_delta< uint32_t, time_clock<uint32_t>::micros_f > timedelta_us_32;
 typedef time_delta< uint8_t,  time_clock<uint8_t>:: millis_f > timedelta_ms_8;
 typedef time_delta< uint16_t, time_clock<uint16_t>::millis_f > timedelta_ms_16;
 typedef time_delta< uint32_t, time_clock<uint32_t>::millis_f > timedelta_ms_32;
