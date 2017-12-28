@@ -58,14 +58,14 @@ template<typename T> struct time_clock
   {
     return micros();
 
-  } // end of micros_()
+  } // end of micros_f()
 
   // internal function to get millis(s) base on current type
   static inline T millis_f()
   {
     return millis();
 
-  } // end of micros_()
+  } // end of millis_f()
   
 }; // end of time_clock
 
