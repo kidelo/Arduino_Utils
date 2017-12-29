@@ -1,7 +1,7 @@
 /*
     Copyright (C) 2017 Kidelo <kidelo@yahoo.com>
 
-    This file is part of util_kid library
+    This file is part of arduino_util_kid library
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,32 +22,32 @@
 
     EXAMPLE:
     -------
-    
+
     #include <util_timer.h>
 
     // a.) simple time measurement ------------------------------------------
-    timedelta_us_16 measure;
-    
+    time_delta_us_16 measure;
+
     const uint16_t t1 = measure.elapsed();
     const uint16_t t2 = measure.elapsed();
 
     // b.) simple timeout ---------------------------------------------------
     timedelta_us_16 timeout1( 1234 );
-    
+
     // do until elapsed
     while( timeout1.is_pending() )
     {
         // do anything ...
         delay( ... )
     }
-    
+
     *************************************************************************************
 */
 #ifndef KID_UTIL_TIMER_H_
 #define KID_UTIL_TIMER_H_
 
 #include <arduino.h>
- 
+
 // **************************************************************************************
 
 // helper class
@@ -58,15 +58,15 @@ template<typename T> struct time_clock
   {
     return micros();
 
-  } // end of micros_f()
+  } // end of micros_()
 
   // internal function to get millis(s) base on current type
   static inline T millis_f()
   {
-    return millis();
+    return micros() / 1000;
 
-  } // end of millis_f()
-  
+  } // end of micros_()
+
 }; // end of time_clock
 
 // **************************************************************************************
@@ -113,6 +113,13 @@ template< typename T, T (*TFUNC)() > struct time_delta
     return elapsed;
   }
 
+  // reset timeout measurement with current timeout
+  inline void clear()
+  {
+    // set start time
+    start = time();
+  }
+
   // restart timeout measurement with new timeout
   inline void restart( T timeout )
   {
@@ -124,11 +131,11 @@ template< typename T, T (*TFUNC)() > struct time_delta
   {
     return timeout;
   }
-  
+
   // number of time ticks until the timeout
   inline T pending() const
   {
-	// get current state
+    // get current state
     const T delta = elapsed();
     const T tmo   = timeout();
 
@@ -141,7 +148,7 @@ template< typename T, T (*TFUNC)() > struct time_delta
   inline bool is_pending() const
   {
      return 0 != pending();
-  
+
   } // end of has_pending()
 
   // returns the elapsed time in time units
@@ -156,7 +163,7 @@ template< typename T, T (*TFUNC)() > struct time_delta
   inline bool is_elapsed() const
   {
      return 0 == pending();
-  
+
   } // end of has_pending()
 
   // calculate elapsed time based on a time value

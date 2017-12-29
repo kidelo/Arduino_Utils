@@ -16,6 +16,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+    @brief This file provides a class for connecting multiple sink to a central print class
 
     *************************************************************************************
 
@@ -54,7 +55,7 @@ struct MultiPrint : public Print
   // ctor
   MultiPrint()
   {
-    // cleanup
+    // store at next free entry
     for( auto & p : m_fwd ) { p = 0; }
   }
 
