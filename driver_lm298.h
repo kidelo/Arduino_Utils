@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2017 Kidelo <kidelo@yahoo.com>
+    Copyright (C) 2017-2018 Kidelo <kidelo@yahoo.com>
 
     This file is part of util_kid library
 
@@ -50,13 +50,13 @@ struct LM298
   // defines control pins to LM298N
   enum
   {
-    PIN_LEFT_DIR_1   = 10,   // direction control
-    PIN_LEFT_DIR_2   = 4,    // direction control
-    PIN_LEFT_PWM     = 6,    // PWM pin -> motor speed
+    PIN_RIGHT_DIR_1   = 4,    // direction control        (gray)
+    PIN_RIGHT_DIR_2   = 7,    // direction control        (yellow)
+    PIN_RIGHT_PWM     = 5,    // PWM pin -> motor speed   (purple)
 
-    PIN_RIGHT_DIR_1  = 7,    // direction control
-    PIN_RIGHT_DIR_2  = 8,    // direction control
-    PIN_RIGHT_PWM    = 5,    // PWM pin -> motor speed
+    PIN_LEFT_DIR_1    = 8,    // direction control        (green)
+    PIN_LEFT_DIR_2    = 11,   // direction control        (white)
+    PIN_LEFT_PWM      = 6,    // PWM pin -> motor speed   (blue)
   };
 
   // EMPERICALLY VALUES, ADJUSTMENT NEEDED !!!!
@@ -154,7 +154,7 @@ struct LM298
       start( opposite, speed );
 
       // wait ( determined empirically )
-      delay( speed / 2 );
+      delay( speed * 3 );
     }
 
     // now real stopping
@@ -166,7 +166,8 @@ struct LM298
   void stop()
   {
     // set maximum speed
-    set_speed(255);
+    speed_left ( 255 );
+    speed_right( 255 );
 
     // reset direction -> FAST MOTOR STOP -> ( HAND BRAKE )
     // see data sheet of LM298N, , page 6
@@ -176,7 +177,7 @@ struct LM298
     digitalWrite( PIN_RIGHT_DIR_2, LOW );
 
     // hold time for transient motion
-    delay(1);
+    delay(2);
 
     // force motor control off
     analogWrite( PIN_LEFT_PWM,  0 );
@@ -187,8 +188,25 @@ struct LM298
 
   } // end of stop()
 
-  // change speed, speed = 0 -> stop / brake
+  // set maximum speed
+  void set_max_speed( uint8_t speed )
+  {
+    max_speed = speed;
+
+    // force limit
+    set_speed( get_speed() );
+
+  } // end of set_max_speed()
+
+  // set speed, clip at maximum
   inline void set_speed( uint8_t val )
+  {
+    control_speed( max( max_speed, val ) );
+
+  } // end of set_speed
+
+  // change speed, speed = 0 -> stop / brake
+  inline void control_speed( uint8_t val )
   {
     // speed
     if ( 0 == val )
@@ -217,8 +235,8 @@ struct LM298
     if ( DRIVE_STOP == m_dir ) return;
 
     // shrink to max
-    const uint8_t val_l = (uint8_t) clip_val<int16_t>( ((int16_t)m_left)  + delta, 0, 255 );
-    const uint8_t val_r = (uint8_t) clip_val<int16_t>( ((int16_t)m_right) + delta, 0, 255 );
+    const uint8_t val_l = (uint8_t) clip_val<int16_t>( ((int16_t)m_left)  + delta, 0, max_speed );
+    const uint8_t val_r = (uint8_t) clip_val<int16_t>( ((int16_t)m_right) + delta, 0, max_speed );
 
     // one motor goes to stop -> brake
     if ( !val_l || !val_r )
@@ -265,9 +283,9 @@ struct LM298
 
     switch( dir )
     {
-      case DRIVE_BACKWARD:  left_fwd = false; right_fwd = false; break;
-      case DRIVE_RIGHT:     left_fwd = false; right_fwd = true;  break;
-      case DRIVE_LEFT:      left_fwd = true;  right_fwd = false; break;
+      case DRIVE_BACKWARD:   left_fwd = false; right_fwd = false; break;
+      case DRIVE_LEFT:       left_fwd = false; right_fwd = true;  break;
+      case DRIVE_RIGHT:      left_fwd = true;  right_fwd = false; break;
       case DRIVE_FORWARD:
       default:
         break;
@@ -303,6 +321,9 @@ struct LM298
 
   // last direction
   Direction m_dir = DRIVE_STOP;
+
+  // maximum allowed speed
+  uint8_t max_speed = 255;
 
   // timeout measurement
   timedelta_ms_16 m_tmo;
