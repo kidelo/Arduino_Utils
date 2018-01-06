@@ -1,7 +1,7 @@
 /*
     Copyright (C) 2017-2018 Kidelo <kidelo@yahoo.com>
 
-    This file is part of util_kid library
+    This file is part of https://github.com/kidelo/KRobot_Utils
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
