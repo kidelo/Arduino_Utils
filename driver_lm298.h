@@ -148,13 +148,13 @@ struct LM298
       const auto opposite = ( DRIVE_FORWARD == m_dir ) ? DRIVE_BACKWARD : DRIVE_FORWARD;
 
       // get reverse speed ( determined empirically )
-      const auto speed = get_speed() / 2;
+      const auto speed = get_speed() / BRAKE_SPEED_DIVIDER;
 
       // start reverse direction
       start( opposite, speed );
 
       // wait ( determined empirically )
-      delay( speed * 3 );
+      delay( speed * BRAKE_TIME_CONSTANT );
     }
 
     // now real stopping
