@@ -50,13 +50,13 @@ struct LM298
   // defines control pins to LM298N
   enum
   {
-    PIN_LEFT_DIR_1   = 10,   // direction control
-    PIN_LEFT_DIR_2   = 4,    // direction control
-    PIN_LEFT_PWM     = 6,    // PWM pin -> motor speed
+    PIN_RIGHT_DIR_1   = 4,    // direction control        (gray)
+    PIN_RIGHT_DIR_2   = 7,    // direction control        (yellow)
+    PIN_RIGHT_PWM     = 5,    // PWM pin -> motor speed   (purple)
 
-    PIN_RIGHT_DIR_1  = 7,    // direction control
-    PIN_RIGHT_DIR_2  = 8,    // direction control
-    PIN_RIGHT_PWM    = 5,    // PWM pin -> motor speed
+    PIN_LEFT_DIR_1    = 8,    // direction control        (green)
+    PIN_LEFT_DIR_2    = 11,   // direction control        (white)
+    PIN_LEFT_PWM      = 6,    // PWM pin -> motor speed   (blue)
   };
 
   // EMPERICALLY VALUES, ADJUSTMENT NEEDED !!!!
