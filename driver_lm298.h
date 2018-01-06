@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2017 Kidelo <kidelo@yahoo.com>
+    Copyright (C) 2017-2018 Kidelo <kidelo@yahoo.com>
 
     This file is part of util_kid library
 
