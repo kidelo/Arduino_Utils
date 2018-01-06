@@ -57,7 +57,7 @@ struct UltraHCSR04 : protected Task
      TMO_ECHO_MAX_MS    = 50,
 
      // guard timeout between two measurements
-     TMO_ECHO_GUARD_MS  = 20,
+     TMO_ECHO_GUARD_MS  = 10,
 
      // -------------------------------------
 
