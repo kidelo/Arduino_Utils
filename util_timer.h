@@ -65,7 +65,7 @@ template<typename T> struct time_clock
   {
     return micros() / 1000;
 
-  } // end of micros_()
+  } // end of millis_s()
 
 }; // end of time_clock
 
