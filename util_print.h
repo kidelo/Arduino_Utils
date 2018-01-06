@@ -59,9 +59,6 @@ struct MultiPrint : public Print
     for( auto & p : m_fwd ) { p = 0; }
   }
 
-  // dtor
-  virtual ~MultiPrint() {}
-
   // add
   void add( Print * p )
   {
