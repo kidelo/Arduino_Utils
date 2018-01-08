@@ -48,7 +48,7 @@ struct UltraHCSR04 : protected Task
      // -------------------------------------
 
      // maximum samples
-     MAX_HIST_SAMPLES   = 16,
+     MAX_HIST_SAMPLES   = 8,
 
      // -------------------------------------
 
@@ -57,7 +57,7 @@ struct UltraHCSR04 : protected Task
      TMO_ECHO_MAX_MS    = 50,
 
      // guard timeout between two measurements
-     TMO_ECHO_GUARD_MS  = 10,
+     TMO_ECHO_GUARD_MS  = 5,
 
      // -------------------------------------
 
@@ -69,16 +69,18 @@ struct UltraHCSR04 : protected Task
 
      // guard time out for stable distance measurement detection
      TMO_STABLE_GUARD   = TMO_ECHO_MAX_MS * MAX_HIST_SAMPLES,
-   };
+  };
 
   // statistics
   struct t_stat
   {
-    uint16_t min;       // min value
-    uint16_t max;       // maximum value
+    typedef float    dist_t;
+    //typedef uint16_t dist_t;
 
-    uint16_t mean_all;  // of all samples
-    uint16_t mean_wo;   // of all samples without min / min max samples
+    dist_t min;       // min value
+    dist_t max;       // maximum value
+
+    dist_t mean;  // of all samples
   };
 
   // ctor, registers at scheduler
@@ -170,9 +172,9 @@ struct UltraHCSR04 : protected Task
   {
     t_stat tmp;
 
-    uint32_t mean = 0;
-    uint16_t  max = 0;
-    uint16_t  min = (uint16_t)(-1);
+    t_stat::dist_t mean_all = 0;
+    t_stat::dist_t max = 0;
+    t_stat::dist_t min = (uint16_t)(-1);
 
     // get all
     for ( auto v : dist_hist )
@@ -182,7 +184,7 @@ struct UltraHCSR04 : protected Task
       if ( v > max ) max = v;
 
       // accumulate
-      mean += v;
+      mean_all += v;
     }
 
     // store
@@ -190,15 +192,9 @@ struct UltraHCSR04 : protected Task
     tmp.max = max;
 
     // normalize
-    tmp.mean_all = mean / MAX_HIST_SAMPLES;
-
-    // remove min / max samples ( one times )
-    mean -= min;
-    mean -= max;
+    tmp.mean = mean_all / MAX_HIST_SAMPLES;
 
     // normalize
-    tmp.mean_wo = mean / (MAX_HIST_SAMPLES-2);
-
     return tmp;
 
   } // end of get()
@@ -282,7 +278,7 @@ protected:
     }
 
     // distance in [cm] for time in [us] @ 20°C at normal air
-    const uint16_t dist_cm = m_time/58;
+    const t_stat::dist_t dist_cm = m_time/58;
 
     // buffer end reached ?
     bool end = false;
@@ -352,7 +348,7 @@ protected:
   uint16_t timer_last;
 
   // distance history
-  uint16_t dist_hist[MAX_HIST_SAMPLES];
+  t_stat::dist_t dist_hist[MAX_HIST_SAMPLES];
 
   // last written entry
   uint8_t dist_last;
