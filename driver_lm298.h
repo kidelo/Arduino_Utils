@@ -81,7 +81,7 @@ struct LM298
     BRAKE_SPEED_DIVIDER    = 2,
 
     // time constant -> original speed to time
-    BRAKE_TIME_CONSTANT    = 2
+    BRAKE_TIME_CONSTANT    = 7
   };
 
   // *********************************************************************************
@@ -148,13 +148,13 @@ struct LM298
       const auto opposite = ( DRIVE_FORWARD == m_dir ) ? DRIVE_BACKWARD : DRIVE_FORWARD;
 
       // get reverse speed ( determined empirically )
-      const auto speed = get_speed() / 2;
+      const auto speed = get_speed() / BRAKE_SPEED_DIVIDER;
 
       // start reverse direction
       start( opposite, speed );
 
       // wait ( determined empirically )
-      delay( speed * 3 );
+      delay( ((uint16_t)speed * 10 ) / BRAKE_TIME_CONSTANT );
     }
 
     // now real stopping
@@ -198,10 +198,17 @@ struct LM298
 
   } // end of set_max_speed()
 
+  // set maximum speed
+  inline uint8_t get_max_speed() const
+  {
+    return max_speed;
+
+  } // end of get_max_speed()
+
   // set speed, clip at maximum
   inline void set_speed( uint8_t val )
   {
-    control_speed( max( max_speed, val ) );
+    control_speed( min( max_speed, val ) );
 
   } // end of set_speed
 

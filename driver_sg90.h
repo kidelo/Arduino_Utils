@@ -79,10 +79,7 @@ struct SG90Servo : public Servo, protected Task
   bool init()
   {
     // test procedure
-    set_angle(  0,  true  );
-    set_angle( -90, true  );
-    set_angle( +90, true  );
-    set_angle(  0,  false );
+    set_angle( 0,  true );
 
     return true;
   }
@@ -106,6 +103,13 @@ struct SG90Servo : public Servo, protected Task
     // free me
     detach();
   }
+
+  // is powered on ?
+  inline bool is_on() const
+  {
+    return attached();
+
+  } // end of is_on()
 
   // returns current angle
   int8_t get_angle()
@@ -179,7 +183,7 @@ struct SG90Servo : public Servo, protected Task
       enable();
 
       // switch power off after idle time
-      setdelay( 2 * delay_ms );
+      setdelay( delay_ms );
     }
 
     m_angle = angle;
