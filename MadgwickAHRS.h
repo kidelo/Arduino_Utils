@@ -11,7 +11,8 @@
 //
 // Date			Author          Notes
 // 29/09/2011	SOH Madgwick    Initial release
-// 02/10/2011	SOH Madgwick	Optimised for reduced CPU load
+// 02/10/2011	SOH Madgwick    Optimised for reduced CPU load
+// 08/01/2018	Kidelo          add support for varying sampling rate, compile always for speed, remove magnetic calculation
 //
 //=============================================================================================
 #ifndef MadgwickAHRS_h
@@ -28,7 +29,6 @@ private:
     float q1;
     float q2;
     float q3;	// quaternion of sensor frame relative to auxiliary frame
-    float invSampleFreq;
     float roll;
     float pitch;
     float yaw;
@@ -39,9 +39,7 @@ private:
 // Function declarations
 public:
     Madgwick(void);
-    void begin(float sampleFrequency) { invSampleFreq = 1.0f / sampleFrequency; }
-    void update(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
-    void updateIMU(float gx, float gy, float gz, float ax, float ay, float az);
+    void updateIMU(float invSampleFreq, float gx, float gy, float gz, float ax, float ay, float az);
     //float getPitch(){return atan2f(2.0f * q2 * q3 - 2.0f * q0 * q1, 2.0f * q0 * q0 + 2.0f * q3 * q3 - 1.0f);};
     //float getRoll(){return -1.0f * asinf(2.0f * q1 * q3 + 2.0f * q0 * q2);};
     //float getYaw(){return atan2f(2.0f * q1 * q2 - 2.0f * q0 * q3, 2.0f * q0 * q0 + 2.0f * q1 * q1 - 1.0f);};
