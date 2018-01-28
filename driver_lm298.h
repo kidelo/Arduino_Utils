@@ -126,8 +126,8 @@ struct LM298
       const bool lr = ( DRIVE_LEFT == dir ) || ( DRIVE_RIGHT == dir );
 
       // more motor power for a short time, fight against friction .. and more
-      set_speed( lr ? POWER_GO_TURN_VAL: POWER_GO_FWD_VAL );
-      delay    ( lr ? POWER_GO_TURN_MS : POWER_GO_FWD_MS  );
+      set_speed( max( (uint8_t) ( lr ? POWER_GO_TURN_VAL: POWER_GO_FWD_VAL ), val ) );
+      delay    (                  lr ? POWER_GO_TURN_MS : POWER_GO_FWD_MS           );
     }
 
     // command normal speed
@@ -138,14 +138,11 @@ struct LM298
   // force brake and then stop of device
   void brake()
   {
-    // drive forward or backward
-    const bool drive = ( DRIVE_FORWARD == m_dir ) || ( DRIVE_BACKWARD == m_dir );
-
     // full speed reached  -> BREAK WITH MOTOR in REVERSE direction for a short time !
-    if( drive && m_tmo.elapsed() > TIME_FULL_SPEED_MS )
+    if( DRIVE_STOP != m_dir && m_tmo.elapsed() > TIME_FULL_SPEED_MS )
     {
       // get opposite direction
-      const auto opposite = ( DRIVE_FORWARD == m_dir ) ? DRIVE_BACKWARD : DRIVE_FORWARD;
+      const auto opposite = opposite_dir( m_dir );
 
       // get reverse speed ( determined empirically )
       const auto speed = get_speed() / BRAKE_SPEED_DIVIDER;
@@ -321,6 +318,21 @@ struct LM298
     return m_dir;
 
   } // end of get_direction()
+
+  // get opposite direction
+  static Direction opposite_dir( Direction dir )
+  {
+    switch( dir )
+    {
+      case DRIVE_FORWARD:  return DRIVE_BACKWARD;
+      case DRIVE_BACKWARD: return DRIVE_FORWARD;
+      case DRIVE_LEFT:     return DRIVE_RIGHT;
+      case DRIVE_RIGHT:    return DRIVE_LEFT;
+      default:
+                           return DRIVE_STOP;
+    }
+
+  } // end of opposite_dir()
 
   // last drive values
   uint8_t m_left  = 0;

@@ -145,7 +145,7 @@ struct SG90Servo : public Servo, protected Task
     write( angle_new + 90 );
 
     // estimate delta if powered off the initial position is unknown -> full range
-    const uint8_t angle_delta = angle_old > angle_new ? angle_old - angle_new : angle_new - angle_old;
+    const uint8_t angle_delta = is_on ? ( angle_old > angle_new ? angle_old - angle_new : angle_new - angle_old ) : 180;
 
     // *******************************************************
 

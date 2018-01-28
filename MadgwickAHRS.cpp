@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------------------------
 // Definitions
 
-#define betaDef          0.01f            // 2 * proportional gain
+#define betaDef          0.02f            // 2 * proportional gain
 #define alphaDef         0.50f            // proportional gain
 
 
@@ -136,7 +136,7 @@ float Madgwick::invSqrt(float x) {
 	i = 0x5f3759df - (i>>1);
 	y = *(float*)&i;
 	y = y * (1.5f - (halfx * y * y));
-	y = y * (1.5f - (halfx * y * y));
+//	y = y * (1.5f - (halfx * y * y));
 	return y;
 }
 
